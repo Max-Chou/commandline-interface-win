@@ -10,7 +10,7 @@ static double price = 0;
 static INT32 number = 0;
 
 static struct option options[] = {
-	{OPTION_MSG, 0, NULL, NULL, NULL, _T("Usage: cmd-win [<option>] ...")},
+	{OPTION_MSG, 0, NULL, NULL, NULL, _T("Usage: cmd [<options>] <commands>...")},
 	{OPTION_MSG, 0, NULL, NULL, NULL, _T("Options")},
 	{OPTION_ENABLE, _T('e'), _T("enable"), &enable, NULL, _T("Enable Feature")},
 	{OPTION_STRING, _T('n'), _T("name"), &name, NULL, _T("Filename")},

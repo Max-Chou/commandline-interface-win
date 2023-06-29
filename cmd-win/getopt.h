@@ -3,6 +3,8 @@
 #include <tchar.h>
 #include <stdio.h>
 
+#define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
+
 enum parse_opt_type {
 	/* special type */
 	OPTION_END,
@@ -37,5 +39,30 @@ struct option {
 	const TCHAR* help;
 };
 
+enum parse_cmd_type {
+	/* special type */
+	CMD_END,
+	CMD_MSG,
+	/* normal command */
+	CMD_NOR,
+};
+
+enum parse_cmd_result {
+	PARSE_CMD_HELP = -2,
+	PARSE_CMD_ERROR = -1,
+	PARSE_CMD_DONE = 0,
+	PARSE_CMD_UNKNOWN
+};
+
+
+struct command {
+	enum parse_cmd_type type;
+	const TCHAR* cmd;
+	const TCHAR* argh;
+	const TCHAR* help;
+	int (*fn)(int, TCHAR**);
+};
 
 extern int getopt(int argc, TCHAR** argv, const struct option* options);
+extern int getcmd(int argc, TCHAR** argv, const struct command* cmds);
+extern int usage_with_commands(const struct command* cmds);

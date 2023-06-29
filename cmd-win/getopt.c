@@ -163,8 +163,8 @@ static enum parse_opt_result parse_long_opt(int argc,TCHAR* arg, const struct op
 	return PARSE_OPT_UNKNOWN;
 }
 
-#define USAGE_OPTS_WIDTH		24
-#define USAGE_GAP				2
+#define USAGE_OPTS_WIDTH		30
+#define USAGE_GAP				4
 static enum parse_opt_result usage_with_options(const struct option* opts)
 {
 	FILE* outfile = stderr;
@@ -278,4 +278,58 @@ int getopt(int argc,TCHAR** argv, const struct option* options)
 		optind++;
 	}
 	return PARSE_OPT_ERROR;
+}
+
+int usage_with_commands(const struct command* cmds)
+{
+	FILE* outfile = stderr;
+
+	for (; cmds->type != CMD_END; cmds++)
+	{
+		size_t pos;
+		int pad;
+
+		// print message only
+		if (cmds->type == OPTION_MSG)
+		{
+			_ftprintf(outfile, _T("%s\n"), cmds->help);
+			continue;
+		}
+
+		// print usage of the command line
+		pos = _ftprintf(outfile, _T("    "));
+		if (cmds->cmd)
+			pos += _ftprintf(outfile, _T("%s"), cmds->cmd);
+
+		if (cmds->argh)
+			pos += _ftprintf(outfile, _T("[=<%s>]"), cmds->argh);
+
+		if (pos <= USAGE_OPTS_WIDTH)
+			pad = USAGE_OPTS_WIDTH - pos;
+		else
+		{
+			_fputtc(_T('\n'), outfile);
+			pad = USAGE_OPTS_WIDTH;
+		}
+		_ftprintf(outfile, _T("%*s%s\n"), pad + USAGE_GAP, _T(""), cmds->help);
+	}
+	_fputtc(_T('\n'), outfile);
+
+	return PARSE_OPT_HELP;
+}
+
+int getcmd(int argc, TCHAR** argv, const struct command* cmds)
+{
+	for (; cmds->type != OPTION_END; cmds++)
+	{
+		struct command* p = cmds;
+		if (!_tcscmp(argv[0], p->cmd))
+			return p->fn(argc - 1, argv + 1);
+	}
+
+	if (!_tcscmp(argv[0], _T("help")))
+	{
+		return usage_with_commands(cmds);
+	}
+	return PARSE_CMD_ERROR;
 }
